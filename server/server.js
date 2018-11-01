@@ -15,7 +15,19 @@ app.post('/todos', (req, res)=>{
    }).catch(e=>{
         res.status(400).send(e);
    })
-})
+});
+
+app.get('/todos', (req, res)=>{
+     TodoModel.find().then(todos=>{
+        res.send({
+            todos
+        })
+     }).catch(e=>{
+        res.status(400).send(e);
+     });
+ })
+
+
 app.listen(3000, ()=>{
     console.log("server running");
 });
