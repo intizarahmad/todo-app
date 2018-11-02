@@ -5,6 +5,7 @@ const { mongoose } = require('../db/mongoose');
 const { UserModel, TodoModel } = require('../models');
 
 const app = express();
+const port = process.env.port || 3000;
 app.use(bodyParser.json());
 
 app.post('/todos', (req, res)=>{
@@ -45,7 +46,23 @@ app.get('/todos', (req, res)=>{
     });
 })
 
+app.delete('/todos/:id', (req, res)=>{
+    let id = req.params.id; 
+    if(!ObjectId.isValid(id)){
+       res.status(404).send();
+    }
+   TodoModel.findByIdAndDelete(id).then(todo=>{
+       if(!todo){
+           res.status(404).send();
+       }
+       res.send({
+           todo
+       })
+   }).catch(e=>{
+      res.status(404).send();
+   });
+})
 
-app.listen(3000, ()=>{
-    console.log("server running");
+app.listen(port, ()=>{
+    console.log(`server running at ${port}`);
 });
