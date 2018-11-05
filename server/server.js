@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const _ = require('lodash');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { mongoose } = require('../db/mongoose');
 const { UserModel, TodoModel } = require('../models');
@@ -63,6 +64,20 @@ app.delete('/todos/:id', (req, res)=>{
    });
 })
 
+// Users 
+app.post('/users', (req, res)=>{
+    const userData = _.pick(req.body, ['email','password']);
+    const user = new UserModel(userData);
+    user.save().then(()=>{
+        return user.generateAuthToken();
+    }).then((token)=>{
+        console.log('token', token);
+        res.header('a-auth', token).send(user);
+    }).catch(e=>{
+        console.log(e);
+        res.status(400).send(e)
+    });
+ });
 app.listen(port, ()=>{
     console.log(`server running at `);
 });
