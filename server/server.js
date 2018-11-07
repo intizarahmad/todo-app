@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
 const ObjectId = require('mongoose').Types.ObjectId;
+const bcrypt = require('bcryptjs');
 const { mongoose } = require('../db/mongoose');
 const { UserModel, TodoModel } = require('../models');
 const { authenticate} = require('./../middleware/authenticate')
@@ -82,6 +83,20 @@ app.post('/users', (req, res)=>{
  app.get('/users/me',authenticate,  (req, res)=>{
      res.send(req.user)
  });
+
+app.post('/users/login', (req, res)=>{
+    const userData = _.pick(req.body, ['email','password']);
+   
+    UserModel.findByCredentials(userData).then((user)=>{
+       return user.generateAuthToken().then(token=>{
+        res.header('x-auth', token).send(user);
+     });
+    }).catch(e=>{
+        console.log(e);
+        res.status(401).send('Login failed');
+    });
+   
+});
 app.listen(port, ()=>{
     console.log(`server running at ${port}`);
 });
