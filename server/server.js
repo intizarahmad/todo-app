@@ -1,3 +1,4 @@
+require('../config/config');
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
@@ -6,13 +7,14 @@ const bcrypt = require('bcryptjs');
 const { mongoose } = require('../db/mongoose');
 const { UserModel, TodoModel } = require('../models');
 const { authenticate} = require('./../middleware/authenticate')
+
 const app = express();
-const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
-app.post('/todos', (req, res)=>{
+app.post('/todos', authenticate, (req, res)=>{
    let toDo = new TodoModel({
-        text:req.body.text
+        text:req.body.text, 
+        _creater:req.user._id
    })
    toDo.save().then((d)=>{
     res.send(d);
@@ -21,8 +23,8 @@ app.post('/todos', (req, res)=>{
    })
 });
 
-app.get('/todos', (req, res)=>{
-     TodoModel.find().then(todos=>{
+app.get('/todos', authenticate,(req, res)=>{
+     TodoModel.find({_creater: req.user._id}).then(todos=>{
         res.send({
             todos
         })
@@ -48,12 +50,12 @@ app.get('/todos', (req, res)=>{
     });
 })
 
-app.delete('/todos/:id', (req, res)=>{
+app.delete('/todos/:id', authenticate, (req, res)=>{
     let id = req.params.id; 
     if(!ObjectId.isValid(id)){
        res.status(404).send();
     }
-   TodoModel.findByIdAndDelete(id).then(todo=>{
+   TodoModel.findOneAndDelete({_id: id, _creater : req.user._id}).then(todo=>{
        if(!todo){
            res.status(404).send();
        }
@@ -94,9 +96,16 @@ app.post('/users/login', (req, res)=>{
     }).catch(e=>{
         console.log(e);
         res.status(401).send('Login failed');
-    });
-   
+    }); 
 });
-app.listen(port, ()=>{
-    console.log(`server running at ${port}`);
+
+app.delete('/users/logout',authenticate, (req, res)=>{
+   req.user.removeToken(req.token).then(()=>{
+    res.status(200).send();
+   }).catch(e=>{
+    res.status(400).send();
+   })
+});
+app.listen(process.env.PORT, ()=>{
+    console.log(`server running at ${process.env.PORT}`);
 });

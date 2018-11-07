@@ -1,0 +1,12 @@
+{
+    "test":{
+        "PORT" : 3000, 
+        "MONGODB_STRING":"mongodb://localhost:27017/TodoApp",
+        "JWT_SECRET":"121212sdfadsf1231sfdasdf"
+    },
+    "developement":{
+        "PORT" : 3000, 
+        "MONGODB_STRING":"mongodb://localhost:27017/TodoApp",
+        "JWT_SECRET":"asdf3425sdfa4dsfsdf6234"
+    }
+}

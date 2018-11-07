@@ -7,6 +7,8 @@ const authenticate = (req, res, next)=>
             return Promise.reject();
         }
         req.user = user;
+        req.token = token;
+        
         next();
     }).catch(e=>{
         res.status(401).send(e);
